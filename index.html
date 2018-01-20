@@ -1,0 +1,523 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>Maker Hub EntrySwipe System</title>
+	<meta name="Resource-type" content="Document" />
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/2.9.5/jquery.fullpage.min.css" />    
+    <?!= include("STYLESHEET"); ?>
+
+	<style>
+
+		/* Sections
+		 * --------------------------------------- */
+		#section0 img,
+		#section1 img{
+			margin: 20px 0 0 0;
+		}
+		#section2 img{
+			margin: 20px 0 0 52px;
+		}
+		#section3 img{
+			bottom: 0px;
+			position: absolute;
+			margin-left: -420px;
+		}
+		.intro p{
+			width: 50%;
+			margin: 0 auto;
+			font-size: 1.5em;
+		}
+		.twitter-share-button{
+			position: absolute;
+			z-index: 99;
+			right: 149px;
+			top: 9px;
+		}
+
+	</style>
+	<!--[if IE]>
+		<script type="text/javascript">
+			 var console = { log: function() {} };
+		</script>
+	<![endif]-->
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/2.9.5/jquery.fullpage.min.js"></script>
+    <script src="https://cdn.rawgit.com/thanashyam/2309671/raw/5168575d69cd84588c52aa183dbfb3d932b9d4f9/jquery.md5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.1/moment-with-locales.min.js" crossorigin="anonymous"></script>
+    
+
+</head>
+<body>
+
+<div id="fullpage">
+	<div class="section welcomesection" id="welcomeScreen">
+        <div class="slide active">
+    		<h1>Welcome to the MakerHub</h1>
+	    	<input type="hidden" name="id" value="1" />
+		    <p>Swipe to sign in!</p>
+            <input style="" id="swipeenter"/>
+            <img style="width: 300px; height:300px;" src="" id="swipeimg" alt="swipe" class="rotate270" />
+        </div>
+        <div class="slide" id="unknownScreen">
+            <div class="unknownUser" tabindex="-1">
+                <h1>Looks like you're not in our system!</h1>
+                <p>Find a Staff Person to set you up</p>
+                <div class="staffOnShiftList"></div>
+            </div>
+        </div>        
+        
+    </div>
+    
+    <div class="section">
+    <p>Welcome <span class="namedisplay"></span></p>
+        <h1>Today I'm here for:</h1>
+        <div class="entryReasonsButtons">
+        
+        </div>
+        <BR><BR>
+        <div class="entryContinueButton niceoval nextbutton">Next</div>
+    </div>
+
+    <div class="section">
+        <h1>I'm probably working with:</h1>
+        <div class="workingOnButtons">
+  
+        </div>
+        <BR><BR>
+        <div class="workingContinueButton niceoval nextbutton">Next</div>
+    </div>
+
+
+	<div class="section" id="userDisplayScreen">
+		<div id="output" class="intro">
+			<div id="project-wrapper">
+                <div id="project-container">
+				    <div id="hero">
+					    <div id="overlay"></div>
+					    <div id="overlay2"></div>
+					    <div id="hero-content">
+						    <h2 id="username">User</h2>
+                            <!--
+						    <ul>
+							<li>
+								<h3>Visits</h3>
+								<p id="visitCount">118</p>
+							</li>
+							<li>
+								<h3>Skills</h3>
+								<p id="skillCount">20</p>
+							</li>
+						    </ul>
+                            -->
+						    <button>Welcome!</button>
+					    </div>
+				    </div>
+			    </div>
+            </div>
+	    </div>
+    </div>
+    
+</div>
+
+<script>
+
+var meritBadges = [];
+function populateMeritBadges(callback){
+  google.script.run.withSuccessHandler(function(data){
+    meritBadges = data;
+    if(callback){callback();}
+  }).getMeritBadges();
+}
+
+var entryReasons = [];
+function populateEntryReasons(callback){
+  google.script.run.withSuccessHandler(function(data){
+    entryReasons = data;
+    if(callback){callback();}
+  }).getEntryReasons();
+
+}
+
+var workingOn = [];
+function populateWorkingOn(callback){
+  google.script.run.withSuccessHandler(function(data){
+    workingOn = data;
+    if(callback){callback();}
+  }).getWorkingOn();
+}
+
+function populateMetadata(callback){
+  populateMeritBadges(callback);
+  populateEntryReasons(callback);
+  populateWorkingOn(callback);
+}
+
+
+var imageUrls = {};
+function placeImageAt(imagename, selector){
+  google.script.run.withSuccessHandler(function(url){
+    if(url){
+      imageUrls[imagename] = url;
+      $(selector).attr("src",url);
+    }
+  }).getImageUrl(imagename);
+}
+
+function getUserDataFromSwipe(swipemd5, callback){
+  google.script.run.withSuccessHandler(function(data){
+    console.log(data);
+    if(callback){
+      callback(data);
+    }
+  }).getUserTableDataFromSwipe(swipemd5);
+}
+
+
+var sessionRand = 0;
+var prevRand = 0;
+function loadSwipePage(silent){
+   currentUser = false;
+   sessionRand = Math.random(); // a random identifier for each swipe session, to help us make sure we're not duplicating data entry
+   clearTimeout(currentTimeout);
+   $(".namedisplay").text("");
+   $("#swipeenter").focus();
+   $("#swipeenter").hide();
+   
+   if(imageUrls["swipe.png"]){
+     $("#swipeimg").attr("src", imageUrls["swipe.png"]);
+     $("#swipeimg").addClass("rotate270");     
+   }
+   
+   if(silent){
+     $.fn.fullpage.silentMoveTo('firstPage', 0);
+   }else{
+     $.fn.fullpage.moveTo('firstPage', 0);   
+   }
+   
+   
+   var payload = ""; //where the userID is stored
+   var recording = false;//whether or not the page is recording keystrokes
+   //  alert("Press 'a1234b' and 'a5678b' to simulate the cardswiper. Card swiper values are in comments")
+
+   $(document).off("keydown"); // make sure we're not duplicating any event listeners, remove them first
+   $(document).keydown(function( event ) {
+     event.preventDefault();//prevents default actions
+     console.log(event.key);
+     if (event.key == "%" /*53*/) { //when a is pressed, start recording and move to second page
+                                     // note: this will change when we use a real card.
+		recording = true;
+        console.log("start recording");
+        loadLoadingPage();
+        clearTimeout(currentTimeout); // make sure there aren't any other timeouts current in operation   
+		currentTimeout = setTimeout(function(){
+            if(recording){
+                recording = false;
+                payload = "";
+                currentUser= false;
+                loadSwipePage(false);
+            }
+		},9000) //wait nine seconds on this page: should probs be changed to wait for data
+      } else if (recording && event.key == "?" /*191*/){ //when b is pressed, stop recording, update card, reset
+        console.log("stop recording");
+		console.log(payload);
+        $(document).off("keydown");
+		recording = false;
+        
+        getUserDataFromSwipe($.md5(payload), function(data){
+           console.log("got data");
+           console.log(data);
+           if(!data){
+             $(document).off("keydown");
+             clearTimeout(currentTimeout); // make sure there aren't any other timeouts current in operation           
+             loadUnknownUserPage();
+           }else{
+             currentUser= data;
+             $(".namedisplay").text(currentUser.name);
+
+             clearTimeout(currentTimeout); // make sure there aren't any other timeouts current in operation   
+             $(document).off("keydown");
+             loadEntryReasonPage();
+           }
+        });
+        payload = "";
+        clearTimeout(currentTimeout);
+		currentTimeout = setTimeout(function(){        
+            loadSwipePage(false);
+		}, 30000); //wait 9 seconds on this page then go back to the beginning
+	} else if (recording){
+		payload += event.key; //add the keys that are pressed between "%" and "?"
+	} else {
+      console.log("nope");
+      return false;
+    }
+  });
+  
+  return;
+  
+  
+}
+
+function loadLoadingPage(){
+  console.log("loading page");
+  $("#swipeimg").removeClass("rotate270");     
+  $("#swipeimg").attr("src", imageUrls["loading.gif"]);
+  
+/*
+  $.fn.fullpage.moveTo('secondPage', 0);   
+  $(".loadingsection").attr("tabindex",-1).focus();      
+*/
+}
+
+function loadUnknownUserPage(){
+  console.log("unknown user");
+  showStaffOnShift();
+  console.log("moving");
+  clearTimeout(currentTimeout);
+//  window.location.href = "#secondPage/1";
+  $.fn.fullpage.moveTo('firstPage', 1);   
+  $(".unknownUser").attr("tabindex",-1).focus();      
+
+  
+  // TODO: Show current staff on shift here.
+  currentTimeout = setTimeout(function(){
+    loadSwipePage(true);
+ //   window.location.href = "#firstPage"
+  }, 15000); //wait 15 seconds on this page then go back to the beginning 
+  
+}
+
+function loadEntryReasonPage(){
+  $(".entryReasonRadio").prop("checked", false); // uncheck previous values
+  clearTimeout(currentTimeout);
+  $.fn.fullpage.moveTo('secondPage', 0);   
+  
+  $(".entryContinueButton").click(function(){
+    console.log("click");
+    entryReason = "";
+    $(".entryReasonsButtons input:checked").each(function(key, value){
+      entryReason = entryReasons[this.value]
+    });
+    $(".entryContinueButton").off("click");
+    loadWorkingOnPage();
+  });
+
+  clearTimeout(currentTimeout);
+  currentTimeout = setTimeout(function(){
+    loadSwipePage(true);
+ //   window.location.href = "#firstPage"
+  }, 15000); //wait 15 seconds on this page then go back to the beginning 
+
+
+}
+
+function loadWorkingOnPage(){
+  console.log("working on page");
+  clearTimeout(currentTimeout);
+  $.fn.fullpage.moveTo('3rdPage', 0);   
+  $(".workingOnCheckbox").prop("checked", false); // uncheck previous values
+  $(".workingContinueButton").click(function(){
+    console.log("recordingEntry");
+    $(".workingContinueButton").off("click");
+    var hereToWorkOn = [];
+    $(".workingOnButtons input:checked").each(function(key, value){
+      hereToWorkOn.push(workingOn[this.value]);
+    });
+    // save to db
+    // make sure we haven't already submitted this, by using the sessionRand value
+    if(prevRand != sessionRand){
+      prevRand == sessionRand;
+      google.script.run.withSuccessHandler(function(){
+        loadWelcomePage();
+      }).recordEntry(currentUser.name, currentUser.netid, entryReason, "No", currentUser.mailinglist, hereToWorkOn.join(","), currentUser.status);      
+    }
+  });
+  clearTimeout(currentTimeout);
+  currentTimeout = setTimeout(function(){
+    loadSwipePage(true);
+ //   window.location.href = "#firstPage"
+  }, 15000); //wait 15 seconds on this page then go back to the beginning 
+
+}
+
+function loadWelcomePage(){
+  //this page then resets back to the original after a couple seconds
+  $("#hero").css("background", "url('"+ currentUser.ImageUrl +"')"); //update the contact picture
+  $("#username").text("Welcome " + currentUser.name + "!"); //update the nam
+//	$("#visitCount").text(data.visitCount);//update the visit count if that exists
+//	$("#skillCount").text(netID.skillCount);//update the skill count if that exists
+// TODO: update with more interesting data, 
+// TODO: show current staff on this page?
+  clearTimeout(currentTimeout);
+  $.fn.fullpage.moveTo('4thPage', 0);   
+  currentTimeout= setTimeout(function(){
+     loadSwipePage(true);
+  },5000); 
+  
+}
+
+function placeImages(){
+   // set up images, from the "forWebsites" folder in dhu3's google photos.
+   placeImageAt("swipe.png", "#swipeimg");
+   placeImageAt("loading.gif", "#loadingimg");
+}
+
+function renderMetadata(){
+  $.each(entryReasons, function(key, value){
+    var check = $('<input class="entryReasonRadio" id="entryReasons['+key+']" type="radio" name="entryReasons"  value="'+key+'" /> <label class="niceoval" for="entryReasons['+key+']">'+value+'</label>');
+    $(".entryReasonsButtons").append(check);
+  });
+  $.each(workingOn, function(key, value){
+    var check = $('<input class="workingOnCheckbox" id="workingOn['+key+']" type="checkbox" name="workingOn[]" value="'+key+'" /> <label class="niceoval" for="workingOn['+key+']">'+value+'</label>');
+    $(".workingOnButtons").append(check);
+  });
+}
+
+
+function allStaffRenderDataReady(callback){
+  if(staffChecklist && staffOnShift){
+    callback(); 
+  }
+}
+
+var staffChecklist = false; 
+function getStaffChecklist(checkCallback, doCallback){
+  google.script.run
+  .withFailureHandler(function(error){console.log(error);})
+  .withSuccessHandler(function(data){
+    staffChecklist = data;
+    console.log(staffChecklist);
+    if(checkCallback){checkCallback(doCallback);}
+  }).getStaffChecklist(); 
+}
+
+function renderStaffOnShift(){
+
+  $(".staffOnShiftList").empty();   // clear what's already there.
+
+  console.log(staffOnShift);
+
+  var staff = Object.keys(staffOnShift);
+
+  if(staff.length == 0){
+    var staffdiv = $("<div class='grid-item noone refreshable staffDiv'></div>");
+    $(".staffOnShiftList").append("<div class='name'>No One On Staff</div><div clas='time'>Come back later</div>");
+  }
+  
+  $.each(staff, function(key, email){
+  
+    console.log("staff");
+  
+    var checklist = staffChecklist.checklistData.data.filter(function(s){
+      return (s.NetId + "@georgetown.edu").toLowerCase() == email.toLowerCase();
+    })[0];
+    var sched = staffOnShift[email];
+    
+    console.log(checklist);
+
+    var img = checklist["Pic on Website"];
+    var name = checklist["Name"];
+    var shiftStart = moment(sched[0].startTime);
+    var shiftEnd = moment(sched[0].endTime);
+    
+    var time = shiftStart.format("h:mm") + " - "  + shiftEnd.format("h:mm a");
+        
+    var staffdiv = $("<div class='grid-item refreshable staffDiv'></div>");
+    if(img.trim().match(/http/)){
+      $(staffdiv).append("<img src='"+img+"' />");
+    }
+    $(staffdiv).append("<div class='name'>"+name+"</div>");
+    $(staffdiv).append("<div class='time'>"+time+"</div>");
+    
+    $(".staffOnShiftList").append(staffdiv);//.masonry("appended", staffdiv);
+
+  });
+  
+  var clickGo = $("<div class='grid-item noone refreshable staffDiv'></div>");
+  var clickGoToSwipe = $("<div class='name'>Got It!</div><div class='time'>Back to Swipe-in</div>").appendTo(clickGo);
+  $(".staffOnShiftList").append(clickGo);
+  
+  $(clickGo).click(function(){
+      clearTimeout(currentTimeout);
+      $.fn.fullpage.silentMoveTo('secondPage', 0); // go back to leftmost part of this section, to reset it back to the original position
+      loadSwipePage(true);
+ //   window.location.href = "#firstPage"
+  });
+  
+  setTimeout(function(){
+//    $(".grid").masonry("layout");
+  }, 500);
+}
+
+
+
+var staffOnShift = false;
+function getStaffOnShift(startTime, endTime, currentTime, checkCallback, doCallback){
+  google.script.run
+  .withFailureHandler(function(error){console.log(error);})
+  .withSuccessHandler(function(data){
+    staffOnShift = data;
+    console.log(staffOnShift);
+    if(checkCallback){checkCallback(doCallback);}
+  }).getStaffOnShift(startTime, endTime, currentTime); 
+}
+
+function showStaffOnShift(){
+ // var now = moment("2017-11-21 18:30", "YYYY-MM-DD HH:mm");
+  var now = moment();
+  var startTime = moment(now).add(-5, "minutes");
+  var endTime = moment(now).add(5, "minutes");
+  
+  staffChecklist = staffOnShift = false;
+  getStaffChecklist(allStaffRenderDataReady, renderStaffOnShift);
+  getStaffOnShift(startTime.toString(), endTime.toString(), now.toString(), allStaffRenderDataReady, renderStaffOnShift);
+}
+
+
+
+
+var entryReason = "";
+var ready = false;
+var currentUser= false;
+var currentTimeout= false;
+
+$(document).ready(function(){
+   if(ready){
+     return;
+   }
+   ready = true;
+
+   $('#fullpage').fullpage({
+     sectionsColor: ['#1bbc9b', '#4BBFC3', '#7BAABE', 'whitesmoke', '#ccddff'],
+     anchors: ['firstPage', 'secondPage', '3rdPage', '4thPage', '5thPage'],
+    // menu: '#menu',
+     controlArrows: false,
+     scrollingSpeed: 1000,
+     afterLoad: function (anchor, index) {
+       console.log("afterLoad "  + index + " anchor " + anchor);
+     }
+     
+   });   
+
+   // populate the metadata we store server-side
+   populateMetadata(function(){
+     if(meritBadges.length > 0 && entryReasons.length > 0 && workingOn.length > 0){
+       renderMetadata();
+     }
+   });
+   
+   placeImages();
+   
+   loadSwipePage();
+});
+
+</script>
+
+</body>
+</html>
