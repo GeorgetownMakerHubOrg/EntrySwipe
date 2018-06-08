@@ -346,7 +346,7 @@ p{
    color: #222;
  }
 
- #output #project-wrapper #project-container #hero #hero-content button {
+ #output #project-wrapper #project-container #hero #hero-content .backbutton button {
    display: block;
    border: solid black 1px;
    outline: none;
@@ -388,12 +388,13 @@ p{
 
 
 .niceoval {
+  display:block;
+  border:solid 1px gray;
   line-height:40px;
   display: inline-block;
   border-radius: 40px;
   padding: 10px;  
-  border: 1px solid blue;
-  background-color: #eeeeee;
+  background-color: #aaaaff;
   border-radius: 40px;
   -webkit-font-smoothing: antialiased;
   margin-top: 10px;
@@ -417,24 +418,13 @@ input[type=radio] {
   display: none;
 }
 
-input:not(:checked) + label {
-  color: red;
-}
-
 input:checked + label {
-  color: green;
+  border: solid 1px #f1f710;
+  color: #f1f710;
 }
 
 input:checked + label:before {
 content: "✓ ";
-}
-
-input:focus {
-  border: 5px solid blue;
-}
-
-select:focus {
-  border: 5px solid blue;
 }
 
 
@@ -451,38 +441,71 @@ input.checkbox:checked + label:before {
 content: "";
 }
 
-.checkHighlighted {
-  border: 5px solid blue;
+.staffOnShiftList {
+    /* align-content: center; */
+    /* align-items: center; */
+    margin: 0 auto;
+    width: auto;
+    padding: 1px;
+    bottom: 5px;  
 }
 
-
-.inputitem {
-margin-top:15px;
-}
-
-.inputtext {
-    border-radius: 25px;
-    border: 2px solid #609;
-    padding: 20px; 
-    width: 200px;
-    height: 15px;  
-  font-size:1.5em;
-}
-
-.longerinput {
-  width: unset;
+.staffDiv {
 
 }
 
-
-.custom-select{
-    border-radius: 25px;
-    border: 2px solid #609;
-    font-size:1.5em;
-    height: 2em;  
+.staffDiv img{
+   width: 150px;
 }
 
 
+
+.staffDiv {
+    float: left;
+    border: 1px solid black;
+    margin: auto;
+    margin-left: 5px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: lightgreen;
+    position: relative;
+    min-height: 150px;
+    width: 150px;
+}
+
+
+.staffDiv .name{
+  position: absolute;
+  line-height: 60%;
+  font-size: 1.2em;
+  top: 10px;
+  left: 5px;
+  color: white; 
+  	text-shadow:
+		-1px -1px 0 #000,
+		1px -1px 0 #000,
+		-1px 1px 0 #000,
+		1px 1px 0 #000;
+}
+
+.staffDiv .time {
+  position: absolute;
+  line-height: 60%;
+  font-size: 1.2em;
+  bottom: 10px;
+  right: 5px;
+  color: white; 
+  	text-shadow:
+		-1px -1px 0 #000,
+		1px -1px 0 #000,
+		-1px 1px 0 #000,
+		1px 1px 0 #000;
+}
+
+.welcomesection {
+/*  margin-top: 200px; */
+}
 
 
 .rotate90 {
@@ -505,17 +528,43 @@ margin-top:15px;
     -moz-transform: rotate(270deg);
     -o-transform: rotate(270deg);
     -ms-transform: rotate(270deg);
-    transform: rotate(270deg);
+    transform: rotate(225deg);
 }
 
-.rotateX {
-    -webkit-transform: rotate(270deg);
-    -moz-transform: rotate(270deg);
-    -o-transform: rotate(270deg);
-    -ms-transform: rotate(270deg);
-    transform: rotate(45deg) scaleX(-1);
+.navbuttons {
+    position: absolute;
+    width: 75%;
+    margin-left: 10%;
+    margin-right: 10%
 }
+
+.backtostart {
+    float: left;
+    margin-left: 10px;
+    background-color: yellow; /* Green */
+    border: 5px solid red;
+    border-radius: 32px;
+    color: red;
+    padding: 15px 25px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.backtostart.solo {
+    border: 5px solid blue;
+    float: unset;
+    margin-top: 15px;
+}
+
+.nextbutton {
+  float: right;
+  margin-right: 10px;
+  border: 5px solid green;
+}
+
 
 </style>
-
 
