@@ -47,7 +47,6 @@
     <?!= include("STYLESHEET"); ?>
 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/2.9.5/jquery.fullpage.min.js"></script>
     <script src="https://cdn.rawgit.com/thanashyam/2309671/raw/5168575d69cd84588c52aa183dbfb3d932b9d4f9/jquery.md5.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.1/moment-with-locales.min.js" crossorigin="anonymous"></script>
@@ -63,7 +62,7 @@
 	    	<input type="hidden" name="id" value="1" />
 		    <p>Swipe to sign in!</p>
             <input style="" id="swipeenter"/>
-            <img style="width: 300px; height:300px;" src="" id="swipeimg" alt="swipe" class="rotate270" />
+            <img style="width: 300px; height:300px;" src="https://drive.google.com/uc?export=download&id=1mmQbk3GkOeNzRkOSs66CqO_az5njdod3RA" id="swipeimg" alt="swipe" class="rotate270" />
 
         </div>
         <div class="slide" id="unknownScreen">
@@ -85,7 +84,7 @@
         <div class="entryReasonsButtons">
         
         </div>
-        <BR><BR>
+        <BR>
         <div class="navbuttons">
             <div class="backdiv">
                 <button class="backtostart">Back to Start</button>
@@ -99,7 +98,7 @@
         <div class="workingOnButtons">
   
         </div>
-        <BR><BR>
+        <BR>
         <div class="navbuttons">
             <div class="backdiv">
                 <button class="backtostart">Back to Start</button>
@@ -117,7 +116,19 @@
 					    <div id="overlay"></div>
 					    <div id="overlay2"></div>
 					    <div id="hero-content">
-						    <h2>Welcome <span id="username">User</span>!</h2>
+						    <h2> <span id="username">User</span>!</h2>
+                            <div id="tasks">
+                               <br>  Help Us Out!
+                               <img src="https://i.pinimg.com/originals/4c/32/82/4c3282033866e22b7ceab02b84899b2a.gif" alt="Smiley face" height="60" width="67">
+                            </div>
+                            <div id="tasksList">
+                               Find Something To do!
+                            </div>
+                            <div id="taskmessage">
+                               <br><br>Look at the Maker Hub App or Trello for more details!
+                            </div>
+                            
+                            
                             <!--
 						    <ul>
 							<li>
@@ -141,6 +152,9 @@
 </div>
 
 <script>
+
+// Swipe is %[numbers and letters]? - gets md5 encrypted before testing
+// secret testing guid is 123
 
 var meritBadges = [];
 function populateMeritBadges(callback){
@@ -167,13 +181,14 @@ function populateWorkingOn(callback){
   }).getWorkingOn();
 }
 
+
 function populateMetadata(callback){
   populateMeritBadges(callback);
   populateEntryReasons(callback);
   populateWorkingOn(callback);
 }
 
-
+/*
 var imageUrls = {};
 function placeImageAt(imagename, selector){
   google.script.run.withSuccessHandler(function(url){
@@ -183,6 +198,47 @@ function placeImageAt(imagename, selector){
     }
   }).getImageUrl(imagename);
 }
+*/
+
+
+var imageUrls = {"swipe.png":"https://drive.google.com/uc?export=download&id=1mmQbk3GkOeNzRkOSs66CqO_az5njdod3RA",
+                "loading.gif": "https://drive.google.com/uc?export=download&id=1Lc8vsUQkbb_xdr-urZ10aKevMloQvrTB9w"};
+var blobTexts = {};
+
+
+function placeImageAt(imagename, selector){
+  if(imageUrls[imagename]){
+    $(selector).attr("src", imageUrls[imagename]);
+  }
+}
+/*
+function placeImageAt(imagename, selector){
+  console.log("placing image");
+  google.script.run
+    .withFailureHandler(function(msg){
+      console.log("Error");
+      console.log(msg);
+    })
+    .withSuccessHandler(function(data){
+      
+      console.log("got data " + data);
+      if(data){
+        var bytes = new Uint8Array(data.blob);
+        var blobtext = URL.createObjectURL(new Blob([bytes], {type: data.contentType}));
+        blobTexts[imagename] = blobtext;
+        // placeItem(blobtext, _item.description, _item.timestamp);
+        //$("#testimg").attr("src",blobtext);
+        $(selector).attr("src", blobtext);
+      }
+     })
+     .getFileBlob(imagename);
+  return;
+
+}
+*/
+
+
+
 
 function getUserDataFromSwipe(swipemd5, callback){
   google.script.run.withSuccessHandler(function(data){
@@ -205,6 +261,7 @@ function loadSwipePage(silent){
    $("#swipeenter").hide();
    
    if(imageUrls["swipe.png"]){
+     console.log("setting swing.png");
      $("#swipeimg").attr("src", imageUrls["swipe.png"]);
      $("#swipeimg").addClass("rotate270");     
    }
@@ -322,6 +379,14 @@ function loadEntryReasonPage(){
     loadWorkingOnPage();
   });
 
+  if(currentUser.role == "Visitor") 
+  {
+      console.log("CURRENT ROLE: "+currentUser.role);
+      visitorDisplay();  
+  }
+  else { 
+      findUser(); 
+  }
   clearTimeout(currentTimeout);
   currentTimeout = setTimeout(function(){
     loadSwipePage(true);
@@ -360,30 +425,93 @@ function loadWorkingOnPage(){
       }).recordEntry(currentUser.name, currentUser.netid, entryReason, "No", currentUser.mailinglist, hereToWorkOn.join(","), currentUser.status);      
     }
   });
+  
   clearTimeout(currentTimeout);
   currentTimeout = setTimeout(function(){
     loadSwipePage(true);
  //   window.location.href = "#firstPage"
-  }, 15000); //wait 15 seconds on this page then go back to the beginning 
+  }, 30000); //wait 15 seconds on this page then go back to the beginning 
 
 }
 
 function loadWelcomePage(){
   //this page then resets back to the original after a couple seconds
   $("#hero").css("background", "url('"+ currentUser.ImageUrl +"')"); //update the contact picture
-  $("#username").text("Welcome " + currentUser.name + "!"); //update the nam
-//	$("#visitCount").text(data.visitCount);//update the visit count if that exists
+  $("#username").text("Welcome " + currentUser.name); //update the nam
+  //	$("#visitCount").text(data.visitCount);//update the visit count if that exists
 //	$("#skillCount").text(netID.skillCount);//update the skill count if that exists
 // TODO: update with more interesting data, 
 // TODO: show current staff on this page?
   clearTimeout(currentTimeout);
-  $.fn.fullpage.moveTo('4thPage', 0);   
-  currentTimeout= setTimeout(function(){
+  
+   
+   $.fn.fullpage.moveTo('4thPage', 0);   
+   currentTimeout= setTimeout(function(){
      loadSwipePage(true);
-  },5000); 
+  },30000); 
   
 }
-
+  var tasknum=0;
+  function findUser()
+  {
+      
+      google.script.run.withFailureHandler(function(message){
+      console.log("error" + message);
+      })
+      .withSuccessHandler(function(data){
+        $("#tasksList").empty();
+        $("#tasks").empty();
+        $("#taskmessage").empty();
+        tasknum=0;
+        $("#taskmessage").html("<br><br> Look at the Maker Hub App or Trello for more details!");
+        $("#tasks").html("<br>Help Us Out!");
+        $("#tasks").append("<img src='https://i.pinimg.com/originals/4c/32/82/4c3282033866e22b7ceab02b84899b2a.gif' alt='Smiley face' height='60' width='67'>");
+        getCards("makerhub4");
+        var trello=data.checklistData.data["Trello ID"];
+        getCards(trello);
+     })
+     .getStaffData(currentUser.netid);
+     
+  }
+  function getCards(trelloID){
+    google.script.run
+      .withFailureHandler(function(e){
+        console.log("ERROR in getCards ");
+        console.log(e)
+        $(".getTrelloCardError").text("Doh! there was a problem submitting: " + e);
+        submitting = false;
+      })
+      .withSuccessHandler(function(data){
+        console.log("Got Trello Cards for "+trelloID);
+        console.log(data);
+        displayTrelloCards(data);
+        submitting = false;
+      })
+      .getTrelloCards(trelloID);
+  }
+  function displayTrelloCards(data)
+  {
+      $.each(data.cards,function(index,card){
+      tasknum++;
+      if(tasknum<8){
+          if(tasknum%2==0)
+              $("#tasksList").append("<div style='background-color:#2a8c73'class=task"+tasknum+">"+card.name+"<br/></div>");
+          else
+              $("#tasksList").append("<div style='background-color:#34aa8c'class=task"+tasknum+">"+card.name+"<br/></div>");
+      }
+      });
+  }
+  function visitorDisplay()
+  {
+      var messages = ["Have Fun!", "Learn Something New!", "Explore!"]; 
+      $("#tasks").empty();
+      $("#taskmessage").empty();
+      $("#tasksList").empty();
+      var choice= Math.floor(Math.random() * 2);
+      console.log("CHOICE: " + choice);
+      $("#tasks").append("<br>"+messages[choice]);
+      
+  }
 function placeImages(){
    // set up images, from the "forWebsites" folder in dhu3's google photos.
    placeImageAt("swipe.png", "#swipeimg");
@@ -441,6 +569,7 @@ function renderStaffOnShift(){
     })[0];
     var sched = staffOnShift[email];
     
+    console.log("Checklist");
     console.log(checklist);
 
     var img = checklist["Pic on Website"];

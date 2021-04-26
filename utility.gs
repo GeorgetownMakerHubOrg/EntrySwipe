@@ -100,3 +100,24 @@ function getImageUrl(imagename){
   }
   return false;
 }
+
+function testGetFileBlog(){
+  getFileBlob("sia33_thumb.jpg");
+}
+
+function getFileBlob(filename){
+  //https://developers.google.com/apps-script/reference/base/blob
+ Logger.log("looking for " + filename);
+ var files = DriveApp.getFilesByName(filename);
+ Logger.log(files);
+ while (files.hasNext()) {
+   var file = files.next();
+   var blob = file.getBlob();
+   Logger.log("got blob");
+   return  { blob: blob.getBytes(),
+             contentType : blob.getContentType()
+           };
+ } 
+ Logger.log("returning false");
+ return false;
+}
